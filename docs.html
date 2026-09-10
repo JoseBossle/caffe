@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAFFE 1.1 - Documentação Oficial</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="section-container nav-wrapper">
+            <a href="index.html" class="u-weight-bold brand-logo">CAFFE 1.1</a>
+            
+            <button class="nav-toggle-btn" data-toggle="#mobile-menu" aria-expanded="false" aria-label="Abrir menu">
+                ☰
+            </button>
+
+            <nav>
+                <ul id="mobile-menu" class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Início</a></li>
+                    <li><a href="docs.html" class="nav-link is-active">Documentação</a></li>
+                    <li><a href="https://github.com/RedGuardiann" class="nav-link" target="_blank">GitHub</a></li>
+                    <li>
+                       <button data-theme-toggle class="btn btn-outline btn-sm">
+                            🌓 Tema
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="section-main">
+        <div class="section-container u-stack">
+            <h1>Documentação Oficial</h1>
+            <p class="lead-text">
+                Manual técnico de referência, arquitetura de camadas e componentes do CAFFE Framework.
+            </p>
+
+           <div class="u-stack">
+                <h2>1. Instalação e Estrutura</h2>
+                <p>Para iniciar um projeto utilizando o CAFFE 1.1, certifique-se de manter a estrutura de diretórios padronizada em letras minúsculas e inclua o arquivo centralizador no <code>&lt;head&gt;</code>:</p>
+                <div class="card">
+                    <div class="card__body">
+                        <code>&lt;link rel="stylesheet" href="css/index.css"&gt;</code>
+                    </div>
+                </div>
+            </div>
+
+            <div class="u-stack">
+                <h2>2. Sistema de Camadas (@layer)</h2>
+                <p>O CAFFE faz uso avançado da regra CSS <code>@layer</code> para controlar rigorosamente a especificidade do código semântico, evitando conflitos de estilos:</p>
+                <div class="demo-grid">
+                    <article class="card">
+                        <div class="card__body u-stack">
+                            <h3>Core</h3>
+                            <p>Variáveis globais, custom properties, reset e tokens base de design.</p>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <div class="card__body u-stack">
+                            <h3>Components</h3>
+                            <p>Elementos visuais reutilizáveis como botões, cards, modais e menus.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="u-stack">
+                <h2>3. Automação JavaScript (Engine)</h2>
+                <p>O motor minimalista opera inteiramente via delegação de eventos, eliminando a necessidade de bindings manuais por elemento[cite: 1, 2]. Importe-o como módulo no final do corpo da página:</p>
+                <div class="card">
+                    <div class="card__body">
+                        <code>&lt;script src="javascript/basic/index.js" type="module"&gt;&lt;/script&gt;</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer u-text-center">
+        <div class="section-container u-stack" style="gap: var(--sp-sm);">
+            <div class="action-group">
+                <a href="index.html" class="nav-link">Início</a>
+                <a href="docs.html" class="nav-link">Documentação</a>
+            </div>
+            <p>&copy; 2026 CAFFE Framework 1.1. Open Source.</p>
+        </div>
+    </footer>
+
+    <script src="js/basic/index.js" type="module"></script>
+</body>
+</html>
