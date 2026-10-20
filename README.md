@@ -278,4 +278,40 @@ A integração de uma página com a estrutura atual utiliza os pontos de entrada
 <script src="js/basic/index.js" type="module"></script>
 ```
 
-Os caminhos acima pressupõem que os
+Os caminhos acima pressupõem que  os arquivos de entrada indicados estejam disponíveis na distribuição utilizada. Na estrutura de referência apresentada, os arquivos listados são core.css e ui.css; portanto, a existência e a função de css/index.css devem ser confirmadas antes de adotá-lo como ponto de entrada oficial.
+
+A recomendação é centralizar as referências públicas de CSS e JavaScript, evitando que os projetos consumidores precisem conhecer detalhes internos dos módulos.
+
+Compatibilidade
+
+O CAFFE utiliza recursos modernos da plataforma Web, incluindo CSS Cascade Layers (@layer), Custom Properties, ES Modules e seletores de validação de formulários.
+
+A compatibilidade deverá ser verificada com os navegadores evergreen suportados pelo projeto, considerando os recursos específicos utilizados por cada componente.
+
+Não há previsão de suporte ao Internet Explorer ou a navegadores sem suporte a ES Modules. Recursos com suporte variável deverão possuir uma estratégia de fallback quando isso for necessário para manter a funcionalidade essencial.
+
+Status do projeto
+
+O CAFFE 1.1 está em desenvolvimento ativo.
+
+A arquitetura central contempla a organização dos estilos, os tokens de design e o motor de automação da interface. O CAFFE Carousel encontra-se na etapa de especificação técnica, com contrato definido para as variantes Hero, Cards e Galeria, inicialização automática, API programática e loop opcional.
+
+Próximas etapas
+
+Implementar o núcleo do CAFFE Carousel.
+
+Desenvolver as variantes Hero, Cards e Galeria.
+
+Integrar o componente ao UIEngine sem duplicar responsabilidades.
+
+Criar exemplos funcionais e documentação da API.
+
+Validar acessibilidade, responsividade e desempenho.
+
+Estabelecer testes automatizados para os comportamentos críticos.
+
+A documentação será atualizada conforme os recursos forem implementados e validados.
+
+Licença
+
+O projeto é distribuído sob a licença MIT. Consulte o arquivo LICENSE do repositório para conhecer os termos aplicáveis.
