@@ -1,109 +1,281 @@
 # CAFFE — CSS Automation For Front End
 
-Biblioteca front-end nativo (HTML5 + CSS3 + JavaScript ES6+), sem build step e sem dependências externas, construído sobre três pilares: CSS Cascade Layers para controle determinístico de especificidade, Design Tokens via Custom Properties, e um motor de automação de UI baseado inteiramente em delegação de eventos.
+O **CAFFE (CSS Automation For Front End)** é uma biblioteca front-end baseada em HTML5, CSS3 e JavaScript ES6+, desenvolvida para projetos que utilizam tecnologias nativas da Web, sem etapas obrigatórias de build e sem dependências externas.
 
-O objetivo do CAFFE não é competir com  utilitários (Tailwind) ou bibliotecas de componentes (Bootstrap), e sim oferecer uma base arquitetural mínima e auditável para quem precisa de HTML/CSS/JS puro com engenharia de front-end real por trás — cascata previsível, acessibilidade nativa e zero binding manual de eventos.
+A proposta é oferecer uma base arquitetural enxuta, organizada e auditável, com foco em previsibilidade da cascata CSS, reutilização de estilos, acessibilidade e automação de comportamentos da interface.
+
+Em vez de substituir o HTML, o CSS e o JavaScript por abstrações adicionais, o CAFFE organiza essas tecnologias para tornar o desenvolvimento front-end mais consistente e sustentável.
 
 ## Arquitetura
 
-### 1. Camadas CSS (@layer)
+A biblioteca está organizada em três pilares: controle da cascata CSS, design tokens e automação de interface por delegação de eventos.
 
-A ordem de prioridade é declarada uma única vez, antes de qualquer regra existir:
+### 1. CSS Cascade Layers
 
-css
+O CAFFE utiliza `@layer` para estabelecer uma ordem explícita de prioridade entre as camadas de estilos:
+
+```css
 @layer base, layout, components, utilities;
+```
 
+Essa declaração define a precedência das camadas independentemente da ordem em que seus arquivos são carregados. Para declarações normais, uma regra de `utilities` prevalece sobre uma regra de `components`, por exemplo, sem depender de seletores artificialmente mais específicos.
 
-Isso desacopla especificidade de ordem de carregamento de arquivo: uma regra em utilities sempre vence uma regra equivalente em components independentemente de qual arquivo CSS foi importado primeiro. Elimina a necessidade estrutural de !important para resolver conflitos de cascata (as exceções que restam no projeto são utilitários com !important deliberado, para forçar sobrescrita pontual — não para compensar arquitetura).
+A organização reduz conflitos de especificidade e a necessidade de utilizar `!important` para corrigir problemas estruturais da cascata.
 
- Layer  Responsabilidade Arquivo 
+| Camada | Responsabilidade | Organização |
+|---|---|---|
+| `base` | Reset, tokens, tipografia e estilos fundamentais | `core.css` |
+| `layout` | Contêineres, grids e estruturas de página | Estilos de layout |
+| `components` | Cabeçalhos, botões, cards, modais, abas, dropdowns e outros componentes | `ui.css` |
+| `utilities` | Espaçamento, alinhamento e visibilidade | `core.css` e `ui.css` |
 
- base Reset, tokens (:root), tipografia, foco visível, prefers-reduced-motioncore.css
- layoutContaineres, grids estruturais, variantes de css 
- components Header, cards, botões, modais, off-canvas, tabs, dropdow nui.css 
- utilities Classes de espaçamento, alinhamento, visibilidade core.css / ui.css 
+Os arquivos e as responsabilidades específicas poderão evoluir conforme a modularização da biblioteca.
 
 ### 2. Design Tokens
 
-Todos os valores de design vivem em Custom Properties no :root, escopadas por data-theme:
+Os valores de design são centralizados em Custom Properties, facilitando a manutenção, a consistência visual e a personalização dos projetos.
 
-- Cor: --color-bg-, --color-text-, --color-primary, --color-border
-- Espa�amento fluido: --sp-xs a --sp-xl (o último usando clamp())
-- Tipografia fluida: --fs-h1 a --fs-h4 via clamp()
-- Camadas de empilhamento nomeadas: --z-header, --z-dropdown, --z-offcanvas, --z-modal
-- Estado sem�ntico: --clr-success, --clr-warning, --clr-danger
+As principais categorias incluem:
 
-O tema dark/light � resolvido por :root[data-theme="light"] / :root[data-theme="dark"], com persist�ncia em localStorage e leitura s�ncrona no <head> (ver seção Temas).
+- **Cores:** `--color-bg-*`, `--color-text-*`, `--color-primary` e `--color-border`.
+- **Espaçamento:** `--sp-xs` até `--sp-xl`, incluindo valores fluidos quando apropriado.
+- **Tipografia:** `--fs-h1` até `--fs-h4`, com escalas responsivas baseadas em `clamp()`.
+- **Camadas de empilhamento:** `--z-header`, `--z-dropdown`, `--z-offcanvas` e `--z-modal`.
+- **Estados semânticos:** `--clr-success`, `--clr-warning` e `--clr-danger`.
 
-### 3. Motor de automação (js/basic/)
+A nomenclatura definitiva dos tokens deve acompanhar a implementação efetiva dos arquivos CSS.
 
-Arquivo  Responsabilidade 
+### 3. Motor de automação de interface
 
- core.js  Utilitários puros, sem dependência de DOM de componente: rafThrottle, getFocusable, trapFocus 
- engine.js  UIEngine - toda a automação de comportamento 
- index.js  Ponto de entrada; inicializa UIEngine em DOMContentLoaded 
+O núcleo JavaScript está organizado em `js/basic/`, com responsabilidades separadas por módulo.
 
-UIEngine registra um único listener de click e um único listener de keydown no document, delegando internamente por data- attribute e closest(). Novos elementos inseridos dinamicamente no DOM funcionam sem re-binding - não há addEventListener por instância de componente.
+| Arquivo | Responsabilidade |
+|---|---|
+| `core.js` | Utilitários independentes de componentes, como `rafThrottle`, `getFocusable` e `trapFocus` |
+| `engine.js` | Motor `UIEngine`, responsável pelos comportamentos da interface |
+| `index.js` | Ponto de entrada e inicialização do motor |
 
-Componentes cobertos pelo engine: toggle genérico ([data-toggle]), modal, off-canvas, dropdown, tabs ([data-tab-target]), tema ([data-theme-toggle]), scroll suave para ancoras, header sticky, e carrossel nativo ([data-carousel-prev/next], aguardando componente CSS correspondente).
+O `UIEngine` utiliza delegação de eventos para centralizar o tratamento de interações. Em vez de registrar listeners individuais para cada componente, identifica os elementos acionados por meio de atributos `data-*` e métodos como `closest()`.
+
+Essa abordagem simplifica a manutenção e permite que elementos adicionados dinamicamente ao DOM utilizem os comportamentos delegados sem exigir a instalação individual de novos listeners.
+
+Entre os comportamentos contemplados pelo motor estão:
+
+- Toggles genéricos por `[data-toggle]`.
+- Modais e painéis off-canvas.
+- Dropdowns.
+- Abas por `[data-tab-target]`.
+- Alternância de tema por `[data-theme-toggle]`.
+- Rolagem suave para âncoras.
+- Cabeçalho sticky.
+- Integração de navegação de carrossel por `[data-carousel-prev]` e `[data-carousel-next]`.
+
+A disponibilidade de cada comportamento depende de sua implementação no código da versão utilizada.
+
+## CAFFE Carousel 1.1
+
+O carrossel é a próxima etapa de evolução da biblioteca. Seu contrato técnico estabelece uma arquitetura híbrida, com recursos nativos do navegador como base e um motor JavaScript próprio para funcionalidades avançadas.
+
+O objetivo é oferecer um componente responsivo, acessível e leve, capaz de apresentar diferentes tipos de conteúdo sem exigir bibliotecas externas.
+
+### Variantes previstas
+
+A primeira versão contemplará três variantes:
+
+**Hero**
+
+Carrossel de destaque para imagens amplas, conteúdo editorial e chamadas para ação. A apresentação deverá preservar a proporção configurada ou aplicar um recorte controlado, conforme a finalidade da imagem.
+
+**Cards**
+
+Carrossel para conjuntos de cards, com quantidade de itens visíveis adaptada ao espaço disponível e espaçamento configurável.
+
+**Galeria**
+
+Carrossel para imagens e conteúdo visual, com suporte a diferentes proporções, legendas opcionais e navegação por controles ou gestos.
+
+### Arquitetura híbrida
+
+O modo básico utilizará recursos nativos, incluindo `overflow`, CSS Scroll Snap e rolagem do navegador. O motor JavaScript avançado será utilizado apenas quando necessário para comportamentos que não sejam atendidos adequadamente pela solução nativa.
+
+A divisão de responsabilidades prevista é:
+
+- CSS: layout, proporções, espaçamento, estados visuais e variantes.
+- JavaScript: inicialização, navegação, estado ativo, acessibilidade e ciclo de vida.
+- Motor avançado: loop controlado, gestos avançados e transições especiais, quando necessários.
+- Configuração: valores padrão, validação e normalização das opções.
+
+### Inicialização e configuração
+
+A inicialização automática será identificada pelo atributo `data-caffe-carousel`, com uma API JavaScript complementar para inicialização explícita e controle programático.
+
+Exemplo de marcação prevista:
+
+```html
+<section
+  class="caffe-carousel caffe-carousel--cards"
+  data-caffe-carousel
+  data-loop="false"
+  aria-label="Projetos em destaque"
+>
+  <div class="caffe-carousel__viewport">
+    <div class="caffe-carousel__track">
+      <article class="caffe-carousel__slide">
+        <!-- Conteúdo do primeiro slide -->
+      </article>
+
+      <article class="caffe-carousel__slide">
+        <!-- Conteúdo do segundo slide -->
+      </article>
+    </div>
+  </div>
+
+  <div class="caffe-carousel__controls">
+    <button type="button" data-carousel-prev
+      aria-label="Slide anterior">
+      Anterior
+    </button>
+
+    <button type="button" data-carousel-next
+      aria-label="Próximo slide">
+      Próximo
+    </button>
+  </div>
+</section>
+```
+
+O exemplo descreve a estrutura prevista para o componente. Sua utilização dependerá da implementação correspondente dos estilos e do JavaScript.
+
+### API programática prevista
+
+A interface pública proposta permitirá operações como:
+
+```js
+const carousel = CaffeCarousel.init(element, {
+  loop: false,
+  slidesPerView: "auto",
+  gap: "1rem"
+});
+
+carousel.next();
+carousel.prev();
+carousel.goTo(2);
+carousel.refresh();
+carousel.pause();
+carousel.play();
+carousel.destroy();
+```
+
+A API definitiva será validada durante a implementação e deverá respeitar os padrões de inicialização e configuração já adotados pela biblioteca.
+
+### Responsividade e proporções
+
+O carrossel deverá se adaptar a diferentes larguras de contêiner, dispositivos e proporções de conteúdo.
+
+Os requisitos incluem:
+
+- Uso de `aspect-ratio` quando a variante exigir proporção definida.
+- Aplicação de `object-fit: cover` ou `contain` conforme o conteúdo.
+- Dimensionamento fluido dos cards.
+- Recalibração após alterações de tamanho ou conteúdo.
+- Prevenção de deslocamentos inesperados de layout.
+- Navegação funcional em telas estreitas, tablets, desktops e monitores ultrawide.
+
+### Loop e reprodução automática
+
+O loop infinito será opcional e permanecerá desativado por padrão. Quando habilitado, deverá respeitar os limites técnicos do conjunto de slides e evitar clonagem indiscriminada de conteúdo.
+
+A reprodução automática também ficará desativada por padrão. Caso seja habilitada, deverá oferecer mecanismos acessíveis de pausa e respeitar as preferências de movimento do usuário.
+
+### Acessibilidade e desempenho
+
+A implementação deverá considerar:
+
+- Navegação por teclado.
+- Foco visível e nomes acessíveis para os controles.
+- Compatibilidade com leitores de tela.
+- Respeito à preferência `prefers-reduced-motion`.
+- Inicialização idempotente.
+- Limpeza de listeners e observadores ao destruir a instância.
+- Ausência de dependências externas obrigatórias.
+- Carregamento de imagens adequado à posição e à importância do conteúdo.
+
+O componente será validado funcionalmente e em diferentes proporções de tela antes de ser considerado concluído.
+
 ## Acessibilidade
 
-Tratada como requisito de arquitetura, não como ajuste posterior:
+A acessibilidade é tratada como requisito de arquitetura, e não como um ajuste posterior.
 
-- Foco visível global via :focus-visible, sem remoção de outline sem substituição.
-- Modal e off-canvas implementam focus trap (Tab/Shift+Tab ciclam dentro do dialog) e retornam o foco ao elemento que abriu o componente, ao fechar.
-- Dropdown e overlays fecham por clique externo e por tecla Escape.
-- Sistema de abas com role="tablist", role="tab", role="tabpanel", aria-selected e tabindex sincronizados via JS a cada troca.
-- Estado de navegação atual expresso via aria-current="page", não por classe CSS sem semántica.
-- prefers-reduced-motion neutraliza animaçõees e transições globalmente.
-- .sr-only implementado via clip (compatível com leitores de tela), não display: none.
+Os princípios adotados incluem:
 
- Temas (dark/light)
+- Foco visível por meio de `:focus-visible`, sem remover o contorno sem substituição adequada.
+- Gerenciamento de foco em modais e off-canvas, incluindo retorno ao elemento que iniciou a interação.
+- Fechamento de overlays por clique externo e pela tecla Escape, quando aplicável.
+- Sincronização de atributos ARIA e estados de navegação.
+- Uso de `aria-current="page"` para identificar a página atual quando apropriado.
+- Respeito à preferência `prefers-reduced-motion`.
+- Utilização de `.sr-only` para conteúdo destinado a leitores de tela, sem recorrer a `display: none` para ocultá-lo.
 
-O tema  lido de localStorage em duas camadas redundantes e intencionais:
+Os componentes deverão ser verificados individualmente para garantir que os comportamentos documentados estejam efetivamente implementados.
 
-1. Um script síncrono, inline, no <head> de cada pagina HTML - roda antes do CSS e antes de qualquer módulo JS, evitando flash do tema errado no primeiro paint.
-2. UIEngine.initTheme(), no módulo JS - mantém o mesmo comportamento como fallback idempotente e cobre a troca de tema em tempo de execução via [data-theme-toggle].
+## Temas: dark e light
 
- Validação de formulário
+O sistema de temas prevê a utilização de atributos no elemento raiz:
 
-Estados de campo usam :user-valid / :user-invalid (reagem após a primeira interação do usuário, ao contrário de :valid/:invalid, que marcariam campos obrigatóios como inválidos antes mesmo de o usuário interagir) para aplicarclr-success /clr-danger na borda. Mensagens de apoio usam a classe .field-message, associada ao campo via aria-describedby, em três variantes semânticas (success,warning,danger). 
+```css
+:root[data-theme="light"] {
+  /* Tokens do tema claro */
+}
+
+:root[data-theme="dark"] {
+  /* Tokens do tema escuro */
+}
+```
+
+A persistência da preferência pode ser realizada por `localStorage`, conforme a implementação do projeto.
+
+Para evitar o flash do tema incorreto durante o carregamento, recomenda-se aplicar a preferência antes da renderização dos estilos, por meio de um script síncrono no `<head>`. O método `UIEngine.initTheme()` poderá complementar esse comportamento e inicializar os controles de alternância.
+
+O script inicial e o motor deverão permanecer consistentes e evitar inicializações duplicadas.
+
+## Validação de formulários
+
+Os estados visuais dos campos podem utilizar `:user-valid` e `:user-invalid`, evitando indicar erros de validação antes da interação do usuário, nos navegadores que oferecem suporte a esses seletores.
+
+Os tokens semânticos `--clr-success` e `--clr-danger` podem ser utilizados para representar os estados de validação. O token `--clr-warning` pode identificar mensagens de atenção.
+
+A classe `.field-message` poderá ser usada para mensagens de apoio associadas ao campo por meio de `aria-describedby`, com variantes semânticas para sucesso, alerta e erro.
+
+A validação visual não substitui a validação funcional dos dados nem as mensagens acessíveis de erro.
+
 ## Estrutura de diretórios
 
+A estrutura de referência atual é:
 
+```text
 caffe/
 ├── index.html
 ├── docs.html
 ├── css/
-│   ├── core.css        # base, layout, tokens
-│   └── ui.css           # components, utilities
+│   ├── core.css
+│   └── ui.css
 └── js/
     └── basic/
-        ├── core.js       # utilitários puros
-        ├── engine.js     # UIEngine
-        └── index.js      # entry point
+        ├── core.js
+        ├── engine.js
+        └── index.js
+```
 
+O CAFFE Carousel acrescentará uma estrutura modular compatível com essa organização. A localização definitiva dos arquivos do componente será definida após a conferência dos diretórios e das convenções existentes no repositório.
 
 ## Uso
 
-html
+A integração de uma página com a estrutura atual utiliza os pontos de entrada centrais:
+
+```html
 <link rel="stylesheet" href="css/index.css">
 
 <script src="js/basic/index.js" type="module"></script>
+```
 
-
-css/index.cssejs/basic/index.jsfuncionam como pontos de entrada centralizadores - mantenha essa referência nos projetos que consumirem o CAFFE, mesmo que os arquivos internos (core.css,ui.css,core.js,engine.js) sejam reorganizados no futuro.
-
-## Compatibilidade
-
-CSS Cascade Layers (@layer),:has()-adjacent selectors ausentes,:user-valid/:user-invalide unidades como dvh tem suporte em todos os navegadores evergreen atuais (Chromium, Firefox, Safari). Não há fallback para Internet Explorer ou navegadores sem suporte a ES Modules.
-
-## Status
-
-Em desenvolvimento ativo. Pendências conhecidas:
-
-- Componente de carrossel (.c-carousel__viewport) referenciado no engine, ainda sem implementaçãoo CSS correspondente.
-- Sem testes automatizados.
-## Licença
-
-MIT.
+Os caminhos acima pressupõem que os
