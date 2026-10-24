@@ -1,5 +1,5 @@
 /**
- * CAFFE ENGINE - Motor de Automação de Comportamentos v3.1
+ * CAFFE ENGINE - Motor de Automação de Comportamentos
  *
  * Tudo por delegação de eventos no document: nenhum componente precisa de
  * binding próprio. Auto-inicializa ao ser carregado (<script type="module">);
@@ -7,6 +7,12 @@
  */
 
 import { rafThrottle, getFocusable, trapFocus } from './core.js';
+
+// Versão única da biblioteca (engine, CSS e páginas seguem este número)
+export const VERSION = '1.1.1';
+
+const THEME_KEY = 'caffe-theme';
+const THEMES = ['light', 'dark'];
 
 /* localStorage pode lançar exceção (cookies bloqueados, modo privado do Safari,
    cota cheia). Sem este invólucro, uma falha aqui interromperia o init() e
@@ -30,14 +36,15 @@ export const UIEngine = {
     if (this._initialized) return;
     this._initialized = true;
 
+    this.initTheme(); // primeiro: o tema não pode esperar os demais handlers
     this.handleToggles();
-    this.handleSmoothScroll();
     this.handleStickyHeader();
     this.handleModals();
     this.handleTabs();
-    this.initTheme();
     this.handleCarousel();
+    this.handleForms();
     this.handleActiveNavLink();
+    this.enhanceA11y();
   },
 
   // Resolve o alvo de um atributo data-* e AVISA quando não acha (antes, um
@@ -55,6 +62,14 @@ export const UIEngine = {
       );
     }
     return el;
+  },
+
+  // aria-expanded só é válido em botões: em <a> ou <div> (ex.: o backdrop do
+  // off-canvas) o atributo seria ARIA inválido.
+  _setExpanded(trigger, value) {
+    if (trigger && trigger.matches('button, [role="button"]')) {
+      trigger.setAttribute('aria-expanded', String(value));
+    }
   },
 
   // --- Overlays (modal / off-canvas): foco, trap e estado ---
@@ -81,15 +96,17 @@ export const UIEngine = {
     if (!panel.contains(document.activeElement)) requestAnimationFrame(focusInto);
   },
 
-  _closeOverlay() {
+  // restoreFocus=false é usado quando o fechamento vem de um link de âncora
+  // dentro do overlay: o foco deve seguir a navegação, não voltar ao gatilho.
+  _closeOverlay({ restoreFocus = true } = {}) {
     const { target, trigger, releaseTrap } = this._overlay;
     if (releaseTrap) releaseTrap();
 
     target?.classList.remove('is-active');
-    trigger?.setAttribute('aria-expanded', 'false');
+    this._setExpanded(trigger, false);
     this._overlay = { target: null, trigger: null, releaseTrap: null };
 
-    trigger?.focus({ preventScroll: true });
+    if (restoreFocus) trigger?.focus({ preventScroll: true });
   },
 
   // --- Dropdown e menu mobile (.dropdown / .nav-menu): abertos via data-toggle ---
@@ -106,12 +123,12 @@ export const UIEngine = {
   _closeDismissable(el, { restoreFocus = false } = {}) {
     el.classList.remove('is-active');
     const triggers = this._triggersOf(el);
-    triggers.forEach((t) => t.setAttribute('aria-expanded', 'false'));
+    triggers.forEach((t) => this._setExpanded(t, false));
     if (restoreFocus) triggers[0]?.focus({ preventScroll: true });
   },
 
   // 1. Alternância genérica via [data-toggle] — overlays ganham focus trap;
-  // os demais (dropdown, nav-menu) seguem com o toggle simples de classe.
+  //    os demais (dropdown, nav-menu) seguem com o toggle simples de classe.
   handleToggles() {
     document.addEventListener('click', (e) => {
       const trigger = e.target.closest('[data-toggle]');
@@ -125,35 +142,43 @@ export const UIEngine = {
 
       if (isOverlay) {
         if (isActive) {
-          this._closeOverlay();
+          this._closeOverlay({ restoreFocus: !trigger.matches('a[href]') });
         } else {
           target.classList.add('is-active');
-          trigger.setAttribute('aria-expanded', 'true');
+          this._setExpanded(trigger, true);
           this._openOverlay(target, trigger);
         }
         return;
       }
 
       target.classList.toggle('is-active', !isActive);
-      trigger.setAttribute('aria-expanded', String(!isActive));
+      this._setExpanded(trigger, !isActive);
     });
   },
 
-  // 2. Fechamento por clique fora e por Esc — overlays, dropdowns e menu mobile
+  // 2. Fechamento por clique fora, por link interno e por Esc —
+  //    overlays, dropdowns e menu mobile
   handleModals() {
     document.addEventListener('click', (e) => {
       // Clique direto no fundo do overlay (o próprio .modal / .offcanvas)
       const isModalBackdrop = e.target.classList.contains('modal')
-                           && e.target.classList.contains('is-active');
+        && e.target.classList.contains('is-active');
       const isOffcanvasBackdrop = e.target.classList.contains('offcanvas')
-                               && e.target.classList.contains('is-active');
+        && e.target.classList.contains('is-active');
       if (isModalBackdrop || isOffcanvasBackdrop) {
         this._closeOverlay();
       }
 
-      // Dropdown / menu mobile: clique fora fecha. Clique no próprio painel ou no
-      // gatilho é ignorado aqui (o gatilho é decidido por handleToggles).
+      // Dropdown / menu mobile: clique fora fecha, e clique num link DENTRO do
+      // painel também (numa página única o menu aberto cobriria o destino da
+      // âncora). Clique em outro ponto do painel ou no gatilho é ignorado aqui
+      // (o gatilho é decidido por handleToggles).
+      const link = e.target.closest('a[href]');
       this._dismissables().forEach((el) => {
+        if (link && el.contains(link)) {
+          this._closeDismissable(el);
+          return;
+        }
         if (el.contains(e.target)) return;
         if (this._triggersOf(el).some((t) => t.contains(e.target))) return;
         this._closeDismissable(el);
@@ -226,6 +251,17 @@ export const UIEngine = {
         const active = btn.classList.contains('is-active');
         btn.setAttribute('aria-selected', String(active));
         btn.setAttribute('tabindex', active ? '0' : '-1');
+
+        // Liga aba <-> painel (aria-controls / aria-labelledby), gerando o id
+        // da aba quando o HTML não traz um. O painel precisa ter id, pois é ele
+        // que o data-tab-target referencia.
+        let panel = null;
+        try { panel = document.querySelector(btn.dataset.tabTarget); } catch { /* aviso sai no clique */ }
+        if (!panel || !panel.id) return;
+
+        btn.setAttribute('aria-controls', panel.id);
+        if (!btn.id) btn.id = `${panel.id}-tab`;
+        if (!panel.hasAttribute('aria-labelledby')) panel.setAttribute('aria-labelledby', btn.id);
       });
     });
     document.querySelectorAll('.tab-panel').forEach((panel) => {
@@ -234,24 +270,32 @@ export const UIEngine = {
   },
 
   // 4. Tema Dark/Light
+  //    Precedência: escolha salva do usuário > data-theme do HTML > 'light'.
+  //    (Antes, um data-theme fixo no <html> impedia a leitura do valor salvo.)
   initTheme() {
-    if (!document.documentElement.hasAttribute('data-theme')) {
-      document.documentElement.setAttribute('data-theme', storage.get('caffe-theme') || 'light');
+    const root = document.documentElement;
+    const saved = storage.get(THEME_KEY);
+
+    if (THEMES.includes(saved)) {
+      root.setAttribute('data-theme', saved);
+    } else if (!root.hasAttribute('data-theme')) {
+      root.setAttribute('data-theme', 'light');
     }
 
     document.addEventListener('click', (e) => {
       const themeToggle = e.target.closest('[data-theme-toggle]');
       if (!themeToggle) return;
 
-      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const currentTheme = root.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-      document.documentElement.setAttribute('data-theme', newTheme);
-      storage.set('caffe-theme', newTheme);
+      root.setAttribute('data-theme', newTheme);
+      storage.set(THEME_KEY, newTheme);
     });
   },
 
-  // 5. Carrossel (comportamento pronto; o CSS de .c-carousel__* ainda está pendente)
+  // 5. Carrossel (mantido sem alterações nesta versão — será tratado em etapa
+  //    própria; o CSS de .c-carousel__* ainda está pendente)
   handleCarousel() {
     document.addEventListener('click', (e) => {
       const prevBtn = e.target.closest('[data-carousel-prev]');
@@ -275,29 +319,11 @@ export const UIEngine = {
     });
   },
 
-  // 6. Scroll suave para âncoras internas
-  handleSmoothScroll() {
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href^="#"]');
-      if (!link || link.hash === '') return;
-
-      // Links que também são gatilhos (itens do off-canvas) deixam a navegação
-      // nativa agir: o scroll-behavior do core.css já suaviza e o hashchange
-      // atualiza o aria-current.
-      if (link.hasAttribute('data-toggle')) return;
-
-      // getElementById em vez de querySelector: ids como "#2026-resultados"
-      // são válidos em HTML mas inválidos como seletor (e lançavam exceção).
-      let id;
-      try { id = decodeURIComponent(link.hash.slice(1)); } catch { return; }
-
-      const target = document.getElementById(id);
-      if (!target) return;
-
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      history.pushState(null, '', link.hash);
-      this._updateActiveNavLink();
+  // 6. Formulários de demonstração: <form data-no-submit> não envia.
+  //    Substitui o onsubmit="..." inline, que quebra sob CSP restritiva.
+  handleForms() {
+    document.addEventListener('submit', (e) => {
+      if (e.target.matches?.('[data-no-submit]')) e.preventDefault();
     });
   },
 
@@ -317,6 +343,9 @@ export const UIEngine = {
   },
 
   // 8. Link de navegação ativo (aria-current="page")
+  //    A rolagem para âncoras é nativa: o scroll-behavior e o scroll-padding-top
+  //    do core.css cuidam da animação e do header sticky; o navegador move o
+  //    foco e o histórico; o hashchange abaixo atualiza o aria-current.
   handleActiveNavLink() {
     if (!document.querySelectorAll('.nav-link[href^="#"]').length) return;
 
@@ -335,6 +364,36 @@ export const UIEngine = {
       } else {
         link.removeAttribute('aria-current');
       }
+    });
+  },
+
+  // 9. Acessibilidade automática: o autor só escreve data-toggle e o engine
+  //    completa o que o HTML não traz.
+  enhanceA11y() {
+    // aria-controls e estado inicial de aria-expanded em todo botão-gatilho
+    document.querySelectorAll('button[data-toggle]').forEach((trigger) => {
+      let target = null;
+      try { target = document.querySelector(trigger.dataset.toggle); } catch { /* aviso sai no clique */ }
+      if (!target) return;
+
+      if (target.id && !trigger.hasAttribute('aria-controls')) {
+        trigger.setAttribute('aria-controls', target.id);
+      }
+      if (!trigger.hasAttribute('aria-expanded')) {
+        this._setExpanded(trigger, target.classList.contains('is-active'));
+      }
+    });
+
+    // Nome acessível para [role="dialog"] sem aria-label/aria-labelledby:
+    // usa o primeiro título interno.
+    document.querySelectorAll('[role="dialog"]').forEach((dialog, n) => {
+      if (dialog.hasAttribute('aria-label') || dialog.hasAttribute('aria-labelledby')) return;
+
+      const heading = dialog.querySelector('h1, h2, h3, h4, h5, h6');
+      if (!heading) return;
+
+      if (!heading.id) heading.id = `caffe-dialog-title-${n + 1}`;
+      dialog.setAttribute('aria-labelledby', heading.id);
     });
   },
 };

@@ -9,233 +9,248 @@
    2. DESIGN TOKENS (Variáveis Globais e Temas Dinâmicos)
    ========================================================================== */
 @layer base {
-    :root[data-theme="light"] {
-        --color-bg-main: #f8f9fa;
-        --color-bg-surface: #ffffff;
-        --color-bg-alt: #f9fafb;
-        --color-text-main: #1f2937;
-        --color-text-muted: #6b7280;
-        --color-text-title: #111827;
-        --color-border: #e5e7eb;
+  /* :root sem atributo = tema claro. Assim a página nunca fica sem cores,
+     mesmo antes do JS rodar ou sem data-theme no <html>. */
+  :root,
+  :root[data-theme="light"] {
+    --color-bg-main: #f8f9fa;
+    --color-bg-surface: #ffffff;
+    --color-bg-alt: #f9fafb;
+    --color-text-main: #1f2937;
+    --color-text-muted: #6b7280;
+    --color-text-title: #111827;
+    --color-border: #e5e7eb;
 
-        --color-primary: #2563eb;
-        --color-primary-hover: #1d4ed8;
-        --color-secondary: #0b3157;
-        --color-white: #ffffff;
-        --color-overlay: rgba(0, 0, 0, 0.5);
-    }
+    --color-primary: #2563eb;
+    --color-primary-hover: #1d4ed8;
+    --color-secondary: #0b3157;
+    --color-white: #ffffff;
+    --color-overlay: rgba(0, 0, 0, 0.5);
+  }
 
-    :root[data-theme="dark"] {
-        --color-bg-main: #121212;
-        --color-bg-surface: #1e1e1e;
-        --color-bg-alt: #2a2a2a;
-        --color-text-main: #f8f9fa;
-        --color-text-muted: #adb5bd;
-        --color-text-title: #ffffff;
-        --color-border: #333333;
+  :root[data-theme="dark"] {
+    --color-bg-main: #121212;
+    --color-bg-surface: #1e1e1e;
+    --color-bg-alt: #2a2a2a;
+    --color-text-main: #f8f9fa;
+    --color-text-muted: #adb5bd;
+    --color-text-title: #ffffff;
+    --color-border: #333333;
 
-        --color-primary: #3b82f6;
-        --color-primary-hover: #60a5fa;
-        --color-secondary: #164e7a;
-        --color-white: #ffffff;
-        --color-overlay: rgba(0, 0, 0, 0.7);
-    }
+    --color-primary: #3b82f6;
+    --color-primary-hover: #60a5fa;
+    --color-secondary: #164e7a;
+    --color-white: #ffffff;
+    --color-overlay: rgba(0, 0, 0, 0.7);
+  }
 
-    :root {
-        /* Espaçamento Fluido */
-        --sp-xs: 0.5rem;
-        --sp-sm: 1rem;
-        --sp-md: 1.5rem;
-        --sp-lg: 3rem;
-        --sp-xl: clamp(3rem, 10vh, 6rem);
+  :root {
+    /* Espaçamento Fluido */
+    --sp-xs: 0.5rem;
+    --sp-sm: 1rem;
+    --sp-md: 1.5rem;
+    --sp-lg: 3rem;
+    --sp-xl: clamp(3rem, 10vh, 6rem);
 
-        /* Layout & Bordas */
-        --container-max: 1200px;
-        --radius: 8px;
-        --gutter: 1.5rem;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+    /* Layout & Bordas */
+    --container-max: 1200px;
+    --radius: 8px;
+    --gutter: 1.5rem;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
 
-        /* Camadas de empilhamento (z-index) */
-        --z-header: 1000;
-        --z-dropdown: 1010;
-        --z-offcanvas: 1900;
-        --z-modal: 2000;
+    /* Altura reservada para o header sticky: evita que âncoras (#secao)
+       fiquem escondidas atrás dele. Ajuste se o seu header for mais alto. */
+    --header-h: 5rem;
 
-        /* Tipografia Fluida */
-        --fs-h1: clamp(2.5rem, 8vw, 4rem);
-        --fs-h2: clamp(2rem, 6vw, 3rem);
-        --fs-h3: clamp(1.5rem, 4vw, 2rem);
-        --fs-h4: clamp(1.25rem, 3vw, 1.5rem);
-        --fs-base: 1rem;
+    /* Camadas de empilhamento (z-index) */
+    --z-header: 1000;
+    --z-dropdown: 1010;
+    --z-offcanvas: 1900;
+    --z-modal: 2000;
 
-        --lh-titles: 1.1;
-        --lh-body: 1.6;
+    /* Tipografia Fluida */
+    --fs-h1: clamp(2.5rem, 8vw, 4rem);
+    --fs-h2: clamp(2rem, 6vw, 3rem);
+    --fs-h3: clamp(1.5rem, 4vw, 2rem);
+    --fs-h4: clamp(1.25rem, 3vw, 1.5rem);
+    --fs-base: 1rem;
 
-        /* Cores de Estado fixas */
-        --clr-success: #16a34a;
-        --clr-warning: #f59e0b;
-        --clr-danger: #dc2626;
-    }
+    --lh-titles: 1.1;
+    --lh-body: 1.6;
 
-    /* ==========================================================================
-       2.5 ESCALA DE BREAKPOINTS (referência)
-       --------------------------------------------------------------------------
-       CSS não permite ler custom properties dentro de @media — é uma limitação
-       real da linguagem, não um descuido. Tailwind/Bootstrap "resolvem" isso com
-       um passo de build que injeta os valores nos utilitários gerados; o CAFFE,
-       por filosofia, não tem build step. Então esta escala funciona como a
-       FONTE DA VERDADE documentada — os valores abaixo são copiados literalmente
-       em todo @media do projeto, e qualquer novo breakpoint deve nascer aqui
-       primeiro, depois ser replicado nos arquivos.
+    /* Estilo dos títulos (h1-h6). Para títulos neutros, sobrescreva na layer
+       theme: --heading-padding: 0; --heading-variant: normal; */
+    --heading-padding: 10px;
+    --heading-variant: small-caps;
 
-       --bp-sm:  640px   — celulares grandes / phablets
-       --bp-md:  768px   — tablets em pé (já usado no header/nav)
-       --bp-lg:  1024px  — tablets deitados / notebooks pequenos
-       --bp-xl:  1280px  — desktops
-       --bp-2xl: 1536px  — telas grandes
-       ========================================================================== */
+    /* Cores de Estado fixas */
+    --clr-success: #16a34a;
+    --clr-warning: #f59e0b;
+    --clr-danger: #dc2626;
+  }
 
-    /* ==========================================================================
-       3. RESET E ACESSIBILIDADE GLOBAL
-       ========================================================================== */
-    *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+  /* ==========================================================================
+     2.5 ESCALA DE BREAKPOINTS (referência)
+     --------------------------------------------------------------------------
+     CSS não permite ler custom properties dentro de @media — é uma limitação
+     real da linguagem, não um descuido. Tailwind/Bootstrap "resolvem" isso com
+     um passo de build que injeta os valores nos utilitários gerados; o CAFFE,
+     por filosofia, não tem build step. Então esta escala funciona como a
+     FONTE DA VERDADE documentada — os valores abaixo são copiados literalmente
+     em todo @media do projeto, e qualquer novo breakpoint deve nascer aqui
+     primeiro, depois ser replicado nos arquivos.
 
-    html { scroll-behavior: smooth; }
+     --bp-sm:  640px  — celulares grandes / phablets
+     --bp-md:  768px  — tablets em pé (já usado no header/nav)
+     --bp-lg:  1024px — tablets deitados / notebooks pequenos
+     --bp-xl:  1280px — desktops
+     --bp-2xl: 1536px — telas grandes
+     ========================================================================== */
 
-    body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background-color: var(--color-bg-main);
-        color: var(--color-text-main);
-        line-height: var(--lh-body);
-        font-size: var(--fs-base);
-        -webkit-font-smoothing: antialiased;
-        transition: background-color 0.3s ease, color 0.3s ease;
-    }
+  /* ==========================================================================
+     3. RESET E ACESSIBILIDADE GLOBAL
+     ========================================================================== */
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-    img { max-width: 100%; height: auto; display: block; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: var(--header-h);
+  }
 
-    /* <button> não herda a fonte do documento por padrão (usa a do sistema),
-       diferente de <a class="btn"> — sem isso o mesmo componente muda de
-       fonte conforme o elemento. */
-    button { font: inherit; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg-main);
+    color: var(--color-text-main);
+    line-height: var(--lh-body);
+    font-size: var(--fs-base);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 
-    h1, h2, h3, h4, h5, h6 {
-        line-height: var(--lh-titles);
-        font-weight: 700;
-        color: var(--color-text-title);
-        margin: 0;
-        padding:10px;
-        font-variant:small-caps;/*colocar cada elemento com sua configuração*/
-    }
-    h1 { font-size: var(--fs-h1); }
-    h2 { font-size: var(--fs-h2); }
-    h3 { font-size: var(--fs-h3); }
-    h4 { font-size: var(--fs-h4); }
+  img { max-width: 100%; height: auto; display: block; }
 
-    p { margin-bottom: 1rem; }
-    p:last-child { margin-bottom: 0; }
-    a { color: inherit; text-decoration: none; transition: 0.2s; }
+  /* <button> não herda a fonte do documento por padrão (usa a do sistema),
+     diferente de <a class="btn"> — sem isso o mesmo componente muda de
+     fonte conforme o elemento. */
+  button { font: inherit; }
 
-    /* Acessibilidade global (foco visível) */
-    :focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 2px;
-        border-radius: var(--radius);
-    }
+  h1, h2, h3, h4, h5, h6 {
+    line-height: var(--lh-titles);
+    font-weight: 700;
+    color: var(--color-text-title);
+    margin: 0;
+    padding: var(--heading-padding);
+    font-variant: var(--heading-variant);
+  }
+  h1 { font-size: var(--fs-h1); }
+  h2 { font-size: var(--fs-h2); }
+  h3 { font-size: var(--fs-h3); }
+  h4 { font-size: var(--fs-h4); }
 
-    .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
+  p { margin-bottom: 1rem; }
+  p:last-child { margin-bottom: 0; }
+  a { color: inherit; text-decoration: none; transition: 0.2s; }
+
+  /* Acessibilidade global (foco visível) */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer layout {
-    /* .section-container: fluida até 640px, depois "trava" em degraus fixos
-       a cada breakpoint — mesmo comportamento do .container do Bootstrap e
-       do container padrão do Tailwind. Nenhuma classe extra necessária: todo
-       projeto que carregar core.css já herda isso automaticamente. */
-    .section-container {
-        width: min(var(--container-max), 100% - 3rem);
-        margin-inline: auto;
-    }
+  /* .section-container: fluida até 640px, depois "trava" em degraus fixos
+     a cada breakpoint — mesmo comportamento do .container do Bootstrap e
+     do container padrão do Tailwind. Nenhuma classe extra necessária: todo
+     projeto que carregar core.css já herda isso automaticamente. */
+  .section-container {
+    width: min(var(--container-max), 100% - 3rem);
+    margin-inline: auto;
+  }
 
-    @media (min-width: 640px) {
-        .section-container { max-width: 640px; }
-    }
-    @media (min-width: 768px) {
-        .section-container { max-width: 768px; }
-    }
-    @media (min-width: 1024px) {
-        .section-container { max-width: 1024px; }
-    }
-    @media (min-width: 1280px) {
-        .section-container { max-width: min(var(--container-max), 1280px); }
-    }
+  @media (min-width: 640px) {
+    .section-container { max-width: 640px; }
+  }
+  @media (min-width: 768px) {
+    .section-container { max-width: 768px; }
+  }
+  @media (min-width: 1024px) {
+    .section-container { max-width: 1024px; }
+  }
+  @media (min-width: 1280px) {
+    .section-container { max-width: min(var(--container-max), 1280px); }
+  }
 
-    .section-main { padding-block: var(--sp-xl); position: relative; }
-    /* Celular deitado (viewport curto): menos respiro vertical entre seções */
-    @media (orientation: landscape) and (max-height: 500px) {
-        .section-main { padding-block: var(--sp-md); }
-    }
-    .section-alt { background: var(--color-bg-alt); }
+  .section-main { padding-block: var(--sp-xl); position: relative; }
+  /* Celular deitado (viewport curto): menos respiro vertical entre seções */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .section-main { padding-block: var(--sp-md); }
+  }
+  .section-alt { background: var(--color-bg-alt); }
 
-    /* .u-grid: fluida por padrão (auto-fit, sem precisar de breakpoint).
-       Os modificadores abaixo são opt-in, para quando um número FIXO de
-       colunas por breakpoint é desejado — inspirados nos utilitários
-       grid-cols-{n} responsivos do Tailwind. */
-    .u-grid {
-        display: grid;
-        gap: var(--gutter);
-        grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
-    }
+  /* .u-grid: fluida por padrão (auto-fit, sem precisar de breakpoint).
+     Os modificadores abaixo são opt-in, para quando um número FIXO de
+     colunas por breakpoint é desejado — inspirados nos utilitários
+     grid-cols-{n} responsivos do Tailwind. */
+  .u-grid {
+    display: grid;
+    gap: var(--gutter);
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  }
 
-    .u-grid--2, .u-grid--3, .u-grid--4 {
-        grid-template-columns: 1fr;
-    }
-    @media (min-width: 640px) {
-        .u-grid--2, .u-grid--3, .u-grid--4 { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (min-width: 1024px) {
-        .u-grid--3 { grid-template-columns: repeat(3, 1fr); }
-        .u-grid--4 { grid-template-columns: repeat(4, 1fr); }
-    }
-    .u-stack > * + * { margin-top: var(--sp-md); }/*melhorar ostitulos e paragrafos*/
+  .u-grid--2, .u-grid--3, .u-grid--4 {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .u-grid--2, .u-grid--3, .u-grid--4 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1024px) {
+    .u-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    .u-grid--4 { grid-template-columns: repeat(4, 1fr); }
+  }
+  .u-stack > * + * { margin-top: var(--sp-md); }
 
-    /* Variante com nome próprio — não colide com .u-stack e é
-       responsiva de verdade: empilhada no mobile, em linha a partir
-       do breakpoint md (768px). Ajuste o breakpoint se precisar de
-       outro ponto de quebra. */
+  /* Variante com nome próprio — não colide com .u-stack e é
+     responsiva de verdade: empilhada no mobile, em linha a partir
+     do breakpoint md (768px). Ajuste o breakpoint se precisar de
+     outro ponto de quebra. */
+  .u-stack-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+  }
+  @media (min-width: 768px) {
     .u-stack-responsive {
-        display: flex;
-        flex-direction: column;
-        gap: var(--sp-sm);
+      flex-direction: row;
+      align-items: center;
     }
-    @media (min-width: 768px) {
-        .u-stack-responsive {
-            flex-direction: row;
-            align-items: center;
-        }
-    }
-    .u-center { display: grid; place-items: center; text-align: center; }
+  }
+  .u-center { display: grid; place-items: center; text-align: center; }
 }

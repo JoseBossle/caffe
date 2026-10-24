@@ -1,40 +1,48 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAFFE Framework - Demo & Docs</title>
+    <title>CAFFE 1.1.1 - Demo &amp; Docs</title>
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
     <header class="main-header">
         <div class="section-container nav-wrapper">
-            <a href="#" class="u-weight-bold brand-logo">CAFFE 1.1</a>
-            
-            <button class="nav-toggle-btn" data-toggle="#mobile-menu" aria-expanded="false" aria-label="Abrir menu">
-                ☰
+            <a href="#inicio" class="header-brand">
+                <span class="brand-title">CAFFE 1.1.1</span>
+            </a>
+
+            <button class="nav-toggle-btn" data-toggle="#mobile-menu" aria-label="Menu">
+                <span aria-hidden="true">☰</span>
             </button>
 
-            <nav>
+            <nav aria-label="Principal">
                 <ul id="mobile-menu" class="nav-menu">
                     <li><a href="#inicio" class="nav-link">Início</a></li>
                     <li><a href="#componentes" class="nav-link">Componentes</a></li>
                     <li><a href="#formularios" class="nav-link">Formulários</a></li>
-                    
+
                     <li class="has-dropdown">
-                        <button class="nav-link nav-dropdown-trigger" data-toggle="#dropdown-demo" aria-expanded="false">
-                            Recursos ▼
+                        <button class="nav-link nav-dropdown-trigger" data-toggle="#dropdown-demo">
+                            Recursos <span aria-hidden="true">▼</span>
                         </button>
                         <ul id="dropdown-demo" class="dropdown">
                             <li><a href="docs.html" class="nav-link">Documentação</a></li>
-                            <li><a href="#" class="nav-link">Acessibilidade</a></li>
+                            <li>
+                                <a href="https://github.com/JoseBossle/caffe" class="nav-link" target="_blank" rel="noopener noreferrer">
+                                    Código-fonte <span class="sr-only">(abre em nova aba)</span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
-                 
+
                     <li>
                         <button data-theme-toggle class="btn btn-outline btn-sm">
-                            🌓 Tema
+                            <span aria-hidden="true">🌓</span> Tema
                         </button>
                     </li>
                 </ul>
@@ -42,42 +50,49 @@
         </div>
     </header>
 
-    <main>
+    <main id="conteudo">
         <section id="inicio" class="section-main u-text-center">
             <div class="section-container u-stack">
                 <h1>CSS Automation For Front End</h1>
                 <p class="lead-text">
-                    Um framework leve, semântico e focado em performance. 
+                    Um framework leve, semântico e focado em performance.
                     Utilize camadas CSS, tokens de design e automação JS mínima.
                 </p>
                 <div class="action-group">
-                  <a href="docs.html" class="btn btn-primary">Ver Documentação</a>
+                    <a href="docs.html" class="btn btn-primary">Ver Documentação</a>
                     <button class="btn btn-outline" data-toggle="#menu-lateral">Menu Off-Canvas</button>
-                    <a href="https://github.com/JoseBossle" class="btn btn-outline" target="_blank">GitHub</a>
+                    <a href="https://github.com/JoseBossle/caffe" class="btn btn-outline" target="_blank" rel="noopener noreferrer">
+                        GitHub <span class="sr-only">(abre em nova aba)</span>
+                    </a>
                 </div>
             </div>
         </section>
+
         <section id="componentes" class="section-main">
             <div class="section-container u-stack">
                 <h2>Componentes Nativos</h2>
-                
-                <div class="demo-grid">
-                    <article class="card">
+
+                <ul class="demo-grid u-list-none">
+                    <li class="card">
                         <div class="card__body u-stack">
                             <h3>Arquitetura Limpa</h3>
                             <p>Separação clara entre tokens, layout e componentes usando CSS Layers.</p>
-                            <button class="btn btn-outline" data-toggle="#modal-docs">Saiba mais</button>
+                            <button class="btn btn-outline" data-toggle="#modal-docs">
+                                Saiba mais <span class="sr-only">sobre Arquitetura Limpa</span>
+                            </button>
                         </div>
-                    </article>
+                    </li>
 
-                    <article class="card">
+                    <li class="card">
                         <div class="card__body u-stack">
                             <h3>JS Minimalista</h3>
                             <p>Engine baseado em delegação de eventos. Zero binding manual por elemento.</p>
-                            <button class="btn btn-outline" data-toggle="#menu-lateral">Saiba mais</button>
+                            <a href="docs.html" class="btn btn-outline">
+                                Saiba mais <span class="sr-only">sobre JS Minimalista</span>
+                            </a>
                         </div>
-                    </article>
-                </div>
+                    </li>
+                </ul>
             </div>
         </section>
 
@@ -85,23 +100,23 @@
             <div class="section-container u-stack">
                 <h2>Modelos de Formulários</h2>
                 <p class="lead-text">Estruturas padronizadas para captura de dados e e-commerce.</p>
-                
+
                 <div class="card">
                     <div class="card__body">
-                        <form class="u-stack" onsubmit="event.preventDefault();">
+                        <form class="u-stack" data-no-submit>
                             <div class="u-stack">
                                 <label for="nome-demo" class="u-weight-bold">Nome Completo</label>
-                                <input type="text" id="nome-demo" placeholder="Digite seu nome">
+                                <input type="text" id="nome-demo" name="nome" autocomplete="name" required placeholder="Digite seu nome">
                             </div>
 
                             <div class="u-stack">
                                 <label for="email-form" class="u-weight-bold">E-mail Profissional</label>
-                                <input type="email" id="email-form" placeholder="seu@email.com">
+                                <input type="email" id="email-form" name="email" autocomplete="email" required placeholder="seu@email.com">
                             </div>
 
                             <div class="u-stack">
                                 <label for="select-demo" class="u-weight-bold">Categoria de Interesse</label>
-                                <select id="select-demo">
+                                <select id="select-demo" name="categoria">
                                     <option value="ecommerce">E-commerce</option>
                                     <option value="institucional">Site Institucional</option>
                                     <option value="landing">Landing Page</option>
@@ -115,11 +130,11 @@
             </div>
         </section>
 
-        <section class="section-main">
+        <section id="abas" class="section-main">
             <div class="section-container">
                 <h2 class="u-mb-2">Sistema de Abas</h2>
                 <div class="tabs-container">
-                    <div class="tabs-nav">
+                    <div class="tabs-nav" aria-label="Camadas do CAFFE">
                         <button class="tab-btn is-active" data-tab-target="#tab-html">HTML</button>
                         <button class="tab-btn" data-tab-target="#tab-css">CSS</button>
                         <button class="tab-btn" data-tab-target="#tab-js">JS</button>
@@ -143,9 +158,11 @@
         <div class="offcanvas__panel" role="dialog" aria-modal="true">
             <header class="offcanvas__header">
                 <h3>Navegação</h3>
-                <button class="offcanvas__close" data-toggle="#menu-lateral" aria-label="Fechar menu">✕</button>
+                <button class="offcanvas__close" data-toggle="#menu-lateral" aria-label="Fechar menu">
+                    <span aria-hidden="true">✕</span>
+                </button>
             </header>
-            <nav class="offcanvas__sections">
+            <nav class="offcanvas__sections" aria-label="Menu lateral">
                 <div class="offcanvas__section">
                     <h3>Links Rápidos</h3>
                     <ul>
@@ -157,7 +174,7 @@
                 </div>
             </nav>
             <footer class="offcanvas__footer">
-                CAFFE v1.1
+                CAFFE v1.1.1
             </footer>
         </div>
     </div>
@@ -166,26 +183,31 @@
         <div class="modal__content u-stack" role="dialog" aria-modal="true">
             <h2>Documentação Técnica</h2>
             <p>O CAFFE utiliza uma abordagem "Mobile First" e prioriza a acessibilidade nativa do navegador.</p>
-            
+
             <div class="u-stack">
                 <label for="email-demo" class="u-weight-bold">Newsletter</label>
-                <input type="email" id="email-demo" placeholder="seu@email.com">
-                <button class="btn btn-primary" data-toggle="#modal-docs">Inscrever-se</button>
+                <input type="email" id="email-demo" name="newsletter" autocomplete="email" placeholder="seu@email.com">
+                <div class="action-group">
+                    <button class="btn btn-primary" data-toggle="#modal-docs">Inscrever-se</button>
+                    <button class="btn btn-outline" data-toggle="#modal-docs">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
 
     <footer class="main-footer u-text-center">
         <div class="section-container u-stack">
-            <div class="action-group">
-                <a href="#inicio" class="nav-link">Início</a>
-                <a href="#componentes" class="nav-link">Componentes</a>
-                <a href="docs.html" class="nav-link">Documentação</a>
-            </div>
-            <p>&copy; 2026 CAFFE Framework 1.1. Open Source.</p>
+            <nav aria-label="Rodapé">
+                <ul class="action-group u-list-none">
+                    <li><a href="#inicio" class="nav-link">Início</a></li>
+                    <li><a href="#componentes" class="nav-link">Componentes</a></li>
+                    <li><a href="docs.html" class="nav-link">Documentação</a></li>
+                </ul>
+            </nav>
+            <p>&copy; 2026 CAFFE Framework 1.1.1. Open Source.</p>
         </div>
     </footer>
-      
+
     <script src="js/core-js/index.js" type="module"></script>
 </body>
 </html>

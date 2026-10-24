@@ -1,29 +1,45 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAFFE 1.1 - Documentação Oficial</title>
+    <title>CAFFE 1.1.1 - Documentação Oficial</title>
+
+    <!-- Tema: lê a escolha salva ANTES do CSS, evitando o flash do tema errado. -->
+    <script>
+        try {
+            var t = localStorage.getItem('caffe-theme');
+            if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) { /* storage indisponível: segue com o padrão */ }
+    </script>
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
     <header class="main-header">
         <div class="section-container nav-wrapper">
-            <a href="index.html" class="u-weight-bold brand-logo">CAFFE 1.1</a>
-            
-            <button class="nav-toggle-btn" data-toggle="#mobile-menu" aria-expanded="false" aria-label="Abrir menu">
-                ☰
+            <a href="index.html" class="header-brand">
+                <span class="brand-title">CAFFE 1.1.1</span>
+            </a>
+
+            <button class="nav-toggle-btn" data-toggle="#mobile-menu" aria-label="Menu">
+                <span aria-hidden="true">☰</span>
             </button>
 
-            <nav>
+            <nav aria-label="Principal">
                 <ul id="mobile-menu" class="nav-menu">
                     <li><a href="index.html" class="nav-link">Início</a></li>
-                    <li><a href="docs.html" class="nav-link is-active">Documentação</a></li>
-                    <li><a href="https://github.com/JoseBosslen" class="nav-link" target="_blank">GitHub</a></li>
+                    <li><a href="docs.html" class="nav-link" aria-current="page">Documentação</a></li>
                     <li>
-                       <button data-theme-toggle class="btn btn-outline btn-sm">
-                            🌓 Tema
+                        <a href="https://github.com/JoseBossle/caffe" class="nav-link" target="_blank" rel="noopener noreferrer">
+                            GitHub <span class="sr-only">(abre em nova aba)</span>
+                        </a>
+                    </li>
+                    <li>
+                        <button data-theme-toggle class="btn btn-outline btn-sm">
+                            <span aria-hidden="true">🌓</span> Tema
                         </button>
                     </li>
                 </ul>
@@ -31,64 +47,128 @@
         </div>
     </header>
 
-    <main class="section-main">
+    <main id="conteudo" class="section-main">
         <div class="section-container u-stack">
             <h1>Documentação Oficial</h1>
             <p class="lead-text">
-                Manual técnico de referência, arquitetura de camadas e componentes do CAFFE Framework.
+                Manual técnico de referência, arquitetura de camadas e automação do CAFFE Framework.
             </p>
 
-           <div class="u-stack">
-                <h2>1. Instalação e Estrutura</h2>
-                <p>Para iniciar um projeto utilizando o CAFFE 1.1, certifique-se de manter a estrutura de diretórios padronizada em letras minúsculas e inclua o arquivo centralizador no <code>&lt;head&gt;</code>:</p>
+            <section class="u-stack" aria-labelledby="doc-instalacao">
+                <h2 id="doc-instalacao">1. Instalação e Estrutura</h2>
+                <p>Mantenha a estrutura de diretórios abaixo (nomes em minúsculas) e use sempre os dois pontos de entrada: <code>css/index.css</code> e <code>js/core-js/index.js</code>.</p>
                 <div class="card">
-                    <div class="card__body">
-                        <code>&lt;link rel="stylesheet" href="css/index.css"&gt;</code>
+                    <div class="card__body u-stack">
+<pre><code>caffe/
+├── index.html
+├── docs.html
+├── css/
+│   ├── index.css          (ponto de entrada do CSS)
+│   ├── core/
+│   │   ├── core.css       (base e layout: tokens, reset, grids)
+│   │   └── ui.css         (components e utilities)
+│   └── theme/
+│       └── estilo-global.css  (theme: personalização do projeto)
+└── js/
+    └── core-js/
+        ├── core.js        (utilitários puros)
+        ├── engine.js      (UIEngine: toda a automação)
+        └── index.js       (ponto de entrada do JS)</code></pre>
+<pre><code>&lt;head&gt;
+  &lt;link rel="stylesheet" href="css/index.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  ...
+  &lt;script src="js/core-js/index.js" type="module"&gt;&lt;/script&gt;
+&lt;/body&gt;</code></pre>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="u-stack">
-                <h2>2. Sistema de Camadas (@layer)</h2>
-                <p>O CAFFE faz uso avançado da regra CSS <code>@layer</code> para controlar rigorosamente a especificidade do código semântico, evitando conflitos de estilos:</p>
-                <div class="demo-grid">
-                    <article class="card">
+            <section class="u-stack" aria-labelledby="doc-camadas">
+                <h2 id="doc-camadas">2. Sistema de Camadas (@layer)</h2>
+                <p>O CAFFE usa <code>@layer</code> para controlar a especificidade sem depender da ordem dos arquivos. A ordem é declarada uma única vez, em <code>core.css</code>: <code>base, layout, components, utilities, theme</code>. Quanto mais à direita, maior a prioridade.</p>
+                <ul class="demo-grid u-list-none">
+                    <li class="card">
                         <div class="card__body u-stack">
-                            <h3>Core</h3>
-                            <p>Variáveis globais, custom properties, reset e tokens base de design.</p>
+                            <h3>base</h3>
+                            <p>Tokens (Custom Properties), reset, tipografia, foco visível e <code>.sr-only</code>. Arquivo: <code>core.css</code>.</p>
                         </div>
-                    </article>
-                    <article class="card">
+                    </li>
+                    <li class="card">
                         <div class="card__body u-stack">
-                            <h3>Components</h3>
-                            <p>Elementos visuais reutilizáveis como botões, cards, modais e menus.</p>
+                            <h3>layout</h3>
+                            <p>Containers, seções e grids estruturais (<code>.section-container</code>, <code>.u-grid</code>, <code>.u-stack</code>). Arquivo: <code>core.css</code>.</p>
                         </div>
-                    </article>
-                </div>
-            </div>
+                    </li>
+                    <li class="card">
+                        <div class="card__body u-stack">
+                            <h3>components</h3>
+                            <p>Header, cards, botões, modais, off-canvas, abas e dropdown. Arquivo: <code>ui.css</code>.</p>
+                        </div>
+                    </li>
+                    <li class="card">
+                        <div class="card__body u-stack">
+                            <h3>utilities</h3>
+                            <p>Classes pontuais de espaçamento, texto e visibilidade (<code>.u-mb-1</code>, <code>.u-text-center</code>). Arquivo: <code>ui.css</code>.</p>
+                        </div>
+                    </li>
+                    <li class="card">
+                        <div class="card__body u-stack">
+                            <h3>theme</h3>
+                            <p>A sua personalização: vence todas as outras camadas, sem <code>!important</code>. Arquivo: <code>theme/estilo-global.css</code>.</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
 
-            <div class="u-stack">
-                <h2>3. Automação JavaScript (Engine)</h2>
-                <p>O motor minimalista opera inteiramente via delegação de eventos, eliminando a necessidade de bindings manuais por elemento[cite: 1, 2]. Importe-o como módulo no final do corpo da página:</p>
+            <section class="u-stack" aria-labelledby="doc-engine">
+                <h2 id="doc-engine">3. Automação JavaScript (Engine)</h2>
+                <p>O motor opera inteiramente por delegação de eventos, sem binding manual por elemento. Ele se auto-inicializa ao ser carregado como módulo. Você controla o comportamento com atributos <code>data-*</code>:</p>
                 <div class="card">
-                    <div class="card__body">
-                        <code>&lt;script src="javascript/basic/index.js" type="module"&gt;&lt;/script&gt;</code>
+                    <div class="card__body u-stack">
+                        <ul class="u-stack u-list-none">
+                            <li><code>data-toggle="#id"</code>: abre/fecha o elemento alvo (modal, off-canvas, dropdown, menu). O engine cuida de <code>aria-expanded</code>, <code>aria-controls</code>, foco e Esc.</li>
+                            <li><code>data-tab-target="#id"</code>: transforma o botão em aba do painel indicado, com <code>role</code>, <code>aria-selected</code> e navegação por setas.</li>
+                            <li><code>data-theme-toggle</code>: alterna entre tema claro e escuro e salva a escolha.</li>
+                            <li><code>data-position="right"</code>: no <code>.offcanvas</code>, abre o painel pela direita.</li>
+                            <li><code>data-no-submit</code>: no <code>&lt;form&gt;</code>, impede o envio (útil em demonstrações).</li>
+                        </ul>
                     </div>
                 </div>
-            </div>
+                <p>Regra de ouro: <strong>classe define aparência, <code>data-*</code> define comportamento e <code>aria-*</code> expressa estado</strong>. Para marcar a página atual no menu, use <code>aria-current="page"</code>.</p>
+            </section>
+
+            <section class="u-stack" aria-labelledby="doc-tema">
+                <h2 id="doc-tema">4. Tema claro e escuro</h2>
+                <p>Sem <code>data-theme</code> no <code>&lt;html&gt;</code>, o CSS assume o tema claro. Para evitar o "flash" do tema errado, cada página lê a escolha salva num script curto no <code>&lt;head&gt;</code>, antes do CSS; o engine repete a leitura como reforço.</p>
+                <div class="card">
+                    <div class="card__body">
+<pre><code>&lt;script&gt;
+  try {
+    var t = localStorage.getItem('caffe-theme');
+    if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+&lt;/script&gt;</code></pre>
+                    </div>
+                </div>
+                <p>Com uma política CSP restritiva (<code>script-src</code> sem <code>'unsafe-inline'</code>), esse script precisa de <em>nonce</em> ou <em>hash</em>; o engine continua aplicando o tema, apenas sem a proteção contra o flash.</p>
+            </section>
         </div>
     </main>
 
     <footer class="main-footer u-text-center">
-        <div class="section-container u-stack" style="gap: var(--sp-sm);">
-            <div class="action-group">
-                <a href="index.html" class="nav-link">Início</a>
-                <a href="docs.html" class="nav-link">Documentação</a>
-            </div>
-            <p>&copy; 2026 CAFFE Framework 1.1. Open Source.</p>
+        <div class="section-container u-stack">
+            <nav aria-label="Rodapé">
+                <ul class="action-group u-list-none">
+                    <li><a href="index.html" class="nav-link">Início</a></li>
+                    <li><a href="docs.html" class="nav-link" aria-current="page">Documentação</a></li>
+                </ul>
+            </nav>
+            <p>&copy; 2026 CAFFE Framework 1.1.1. Open Source.</p>
         </div>
     </footer>
 
-    <script src="js/basic/index.js" type="module"></script>
+    <script src="js/core-js/index.js" type="module"></script>
 </body>
 </html>
